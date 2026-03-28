@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+<meta charset="UTF-8">
+<title>Tin tức</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    margin:0;
+    background:#f1f1f1;
+}
+
+/* HEADER */
+
+.header{
+    background:#b30000;
+    color:white;
+    padding:15px 0;
+}
+
+.header .wrap{
+    width:1100px;
+    margin:auto;
+    font-size:28px;
+    font-weight:bold;
+}
+
+/* MENU */
+
+.menu{
+    background:white;
+    border-bottom:1px solid #ddd;
+}
+
+.menu .wrap{
+    width:1100px;
+    margin:auto;
+    padding:10px 0;
+}
+
+.menu a{
+    margin-right:20px;
+    text-decoration:none;
+    color:#111;
+    font-weight:bold;
+}
+
+.menu a.active{
+    color:#c00;
+}
+
+/* CONTAINER */
+
+.container{
+    width:1100px;
+    margin:auto;
+    margin-top:20px;
+}
+
+/* FEATURED NEWS */
+
+.featured{
+    display:flex;
+    background:white;
+    margin-bottom:20px;
+}
+
+.featured img{
+    width:60%;
+    height:350px;
+    object-fit:cover;
+}
+
+.featured-content{
+    padding:20px;
+}
+
+.featured-title{
+    font-size:26px;
+    font-weight:bold;
+}
+
+.featured-title a{
+    text-decoration:none;
+    color:black;
+}
+
+.featured-summary{
+    margin-top:10px;
+    color:#555;
+}
+
+/* NEWS LIST */
+
+.news-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.news-item{
+    background:white;
+    display:flex;
+    padding:10px;
+}
+
+.news-item img{
+    width:140px;
+    height:90px;
+    object-fit:cover;
+}
+
+.news-content{
+    margin-left:10px;
+}
+
+.news-title{
+    font-weight:bold;
+}
+
+.news-title a{
+    text-decoration:none;
+    color:#111;
+}
+
+.news-title a:hover{
+    color:#c00;
+}
+
+.news-summary{
+    font-size:14px;
+    color:#555;
+    margin-top:5px;
+}
+
+.meta{
+    font-size:12px;
+    color:#999;
+    margin-top:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<div class="wrap">
+Trang Tin Tức
+</div>
+</div>
+
+<div class="menu">
+<div class="wrap">
+
+<a href="#" data-tag="">Trang chủ</a>
+<a href="#" data-tag="1040E7AE-C423-418D-826C-D836BB7845E2">Thời sự</a>
+<a href="#" data-tag="62AB9B20-CCD9-43E5-85FD-A6F72DD81BDA">Kinh tế</a>
+<a href="#" data-tag="3541E741-118D-46F4-B4AB-97454CD5025F">Thế giới</a>
+<a href="#" data-tag="D4093505-2A36-4838-B11B-7DA1458CF6EC">Công nghệ</a>
+<a href="#" data-tag="37E2131B-0CFF-4A2F-AD97-4757CE42ED32">Giải trí</a>
+
+</div>
+</div>
+
+<div class="container">
+
+<div id="featured"></div>
+
+<div class="news-list" id="newsList">
+Đang tải...
+</div>
+
+</div>
+
+<script>
+
+const API = "http://localhost:5257/api/news";
+
+/* load tin */
+
+function loadNews(tag){
+
+let url = API;
+
+if(tag){
+url = API + "?tag=" + tag;
+}
+
+fetch(url)
+.then(res => res.json())
+.then(result => {
+
+renderNews(result.data);
+
+})
+.catch(error=>{
+
+console.error(error);
+document.getElementById("newsList").innerHTML = "Không thể tải dữ liệu";
+
+});
+
+}
+
+/* render tin */
+
+function renderNews(newsList){
+
+if(!newsList || newsList.length === 0){
+document.getElementById("newsList").innerHTML = "Không có dữ liệu";
+document.getElementById("featured").innerHTML = "";
+return;
+}
+
+newsList.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+
+let first = newsList[0];
+
+document.getElementById("featured").innerHTML = `
+
+<div class="featured">
+
+<img src="${first.thumbnailUrl ?? 'https://picsum.photos/800/400'}">
+
+<div class="featured-content">
+
+<div class="featured-title">
+<a href="news.html?id=${first.id}">
+${first.title}
+</a>
+</div>
+
+<div class="featured-summary">
+${first.summary ?? ""}
+</div>
+
+<div class="meta">
+${new Date(first.createdAt).toLocaleString()}
+</div>
+
+</div>
+
+</div>
+`;
+
+let container = document.getElementById("newsList");
+
+container.innerHTML = "";
+
+newsList.slice(1).forEach(news => {
+
+container.innerHTML += `
+
+<div class="news-item">
+
+<img src="${news.thumbnailUrl ?? 'https://picsum.photos/200/120'}">
+
+<div class="news-content">
+
+<div class="news-title">
+<a href="news.html?id=${news.id}">
+${news.title}
+</a>
+</div>
+
+<div class="news-summary">
+${news.summary ?? ""}
+</div>
+
+<div class="meta">
+${new Date(news.createdAt).toLocaleString()}
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+/* click menu */
+
+document.querySelectorAll(".menu a").forEach(link => {
+
+link.addEventListener("click", function(e){
+
+e.preventDefault();
+
+document.querySelectorAll(".menu a").forEach(a => a.classList.remove("active"));
+this.classList.add("active");
+
+const tag = this.dataset.tag;
+
+loadNews(tag);
+
+});
+
+});
+
+/* load trang chủ */
+
+loadNews();
+
+</script>
+
+</body>
+</html>

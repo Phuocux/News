@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Create News</title>
+</head>
+
+<body>
+
+<h1>Tạo bài báo</h1>
+
+<form id="form">
+
+Title<br>
+<input type="text" id="title" required><br><br>
+
+Summary<br>
+<textarea id="summary"></textarea><br><br>
+
+Content<br>
+<textarea id="content"></textarea><br><br>
+
+AuthorId<br>
+<input type="text" id="authorId" required><br><br>
+
+<button type="submit">Create</button>
+
+</form>
+
+<script>
+
+document.getElementById("form").addEventListener("submit", function(e){
+
+e.preventDefault();
+
+const data = {
+
+title: document.getElementById("title").value,
+summary: document.getElementById("summary").value,
+content: document.getElementById("content").value,
+authorId: document.getElementById("authorId").value
+
+};
+
+fetch("http://localhost:5257/api/News",{
+
+method:"POST",
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(data)
+
+})
+.then(res => res.json())
+.then(data => {
+
+alert("Tạo bài báo thành công");
+
+window.location.href="index.html";
+
+});
+
+});
+
+</script>
+
+</body>
+</html>

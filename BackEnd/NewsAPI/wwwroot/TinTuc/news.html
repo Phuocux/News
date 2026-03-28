@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+<meta charset="UTF-8">
+<title>Đọc tin</title>
+
+<style>
+
+body{
+    font-family: Arial;
+    margin:0;
+    background:#f4f4f4;
+}
+
+/* header */
+
+.header{
+    background:#b30000;
+    color:white;
+    padding:15px 0;
+}
+
+.header .wrap{
+    width:1100px;
+    margin:auto;
+    font-size:24px;
+    font-weight:bold;
+}
+
+/* container */
+
+.container{
+    width:1100px;
+    margin:auto;
+    margin-top:30px;
+    display:grid;
+    grid-template-columns: 750px 320px;
+    gap:30px;
+}
+
+/* article */
+
+.article{
+    background:white;
+    padding:30px;
+}
+
+.title{
+    font-size:32px;
+    font-weight:bold;
+}
+
+.meta{
+    margin-top:10px;
+    color:#888;
+    font-size:14px;
+}
+
+.summary{
+    margin-top:15px;
+    font-size:18px;
+    color:#555;
+    font-style:italic;
+}
+
+.thumbnail{
+    margin-top:20px;
+}
+
+.thumbnail img{
+    width:100%;
+    max-height:400px;
+    object-fit:cover;
+}
+
+.content{
+    margin-top:25px;
+    font-size:18px;
+    line-height:1.7;
+}
+
+/* sidebar */
+
+.sidebar{
+    background:white;
+    padding:20px;
+}
+
+.sidebar h3{
+    margin-top:0;
+}
+
+.related-item{
+    margin-bottom:15px;
+}
+
+.related-item a{
+    text-decoration:none;
+    color:#111;
+}
+
+.related-item a:hover{
+    color:#c00;
+}
+
+.back{
+    display:inline-block;
+    margin-bottom:20px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="header">
+<div class="wrap">
+Trang Tin Tức
+</div>
+</div>
+
+<div class="container">
+
+<!-- ARTICLE -->
+
+<div class="article">
+
+<a class="back" href="Home.html">⬅ Trang chủ</a>
+
+<div class="title" id="title"></div>
+
+<div class="meta" id="meta"></div>
+
+<div class="summary" id="summary"></div>
+
+<div class="thumbnail">
+<img id="thumbnail">
+</div>
+
+<div class="content" id="content"></div>
+
+</div>
+
+<!-- SIDEBAR -->
+
+<div class="sidebar">
+
+<h3>Tin mới</h3>
+
+<div id="relatedNews">
+Đang tải...
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+/* lấy id từ url */
+
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+/* load bài viết */
+
+fetch(`http://localhost:5257/api/news/${id}`)
+.then(res => res.json())
+.then(result => {
+
+const news = result.data;
+
+document.getElementById("title").innerText = news.title;
+document.getElementById("summary").innerText = news.summary ?? "";
+document.getElementById("content").innerText = news.content ?? "";
+
+document.getElementById("meta").innerText =
+new Date(news.createdAt).toLocaleString();
+
+/* hiển thị ảnh nếu có */
+
+const img = document.getElementById("thumbnail");
+
+if(news.thumbnailUrl){
+    img.src = news.thumbnailUrl;
+}else{
+    img.style.display = "none";
+}
+
+});
+
+/* load tin liên quan */
+
+fetch("http://localhost:5257/api/news")
+.then(res => res.json())
+.then(result => {
+
+const list = result.data;
+
+const container = document.getElementById("relatedNews");
+
+container.innerHTML = "";
+
+list.slice(0,6).forEach(n => {
+
+container.innerHTML += `
+<div class="related-item">
+<a href="news.html?id=${n.id}">
+${n.title}
+</a>
+</div>
+`;
+
+});
+
+});
+
+</script>
+
+</body>
+</html>
