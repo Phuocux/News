@@ -1,6 +1,8 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
 import Home from "./pages/Home";
 import Article from "./pages/Article";
+import CreateArticle from "./pages/CreateArticle";
+import ErrorPage from "./pages/Error";  
 
 export const router = createBrowserRouter([
   {
@@ -11,4 +13,12 @@ export const router = createBrowserRouter([
     path: "/article/:id",
     Component: Article,
   },
+  {
+    path: "/create-article",
+    Component: CreateArticle,
+  },
+  {
+    path: "*",
+    Component: ErrorPage,
+  }
 ]);

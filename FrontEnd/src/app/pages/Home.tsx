@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { AdBanner } from '../components/AdBanner';
 import { MainArticle } from '../components/MainArticle';

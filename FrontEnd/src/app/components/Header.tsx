@@ -59,7 +59,7 @@ export function Header({ onLoginClick }: HeaderProps) {
                 <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/>
               </svg>
             </div>
-            <span className="text-3xl font-bold text-[#0090DA] tracking-wide">THANH NIÊN</span>
+            <span className="text-3xl font-bold text-[#0090DA] tracking-wide">HAU NEWS</span>
           </a>
 
           {/* Right - Actions */}

@@ -31,7 +31,14 @@ export default function Article() {
     fetchData();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="flex flex-col items-center">
+        {/* Vòng xoay Loading */}
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600 mb-4"></div>
+        <p className="text-gray-600 font-medium">Đang tải bài viết...</p>
+      </div>
+    </div>
+  ;
 
   if (!article) return <Navigate to="/" replace />;
 
