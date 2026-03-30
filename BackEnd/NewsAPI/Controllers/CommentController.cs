@@ -22,6 +22,9 @@ namespace NewsAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(Comment comment)
         {
+            var userId = int.Parse(User.FindFirst("Id")!.Value);
+
+            comment.UserId = userId;
             comment.CreatedAt = DateTime.Now;
 
             _context.Comments.Add(comment);

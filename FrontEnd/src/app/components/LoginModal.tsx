@@ -1,25 +1,66 @@
 import { useState } from 'react';
 import { X, Eye, EyeOff } from 'lucide-react';
+import { login, register } from "../../service/authService";
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  setUser: (user: any) => void;
 }
 
-export function LoginModal({ isOpen, onClose }: LoginModalProps) {
+export function LoginModal({ isOpen, onClose,setUser }: LoginModalProps) {
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  /*const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login/register logic here
     console.log('Submit:', { email, password, type: activeTab });
     onClose();
-  };
+  };*/
+ 
+
+
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    if (activeTab === "login") {
+      const res = await login({ username, password });
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify(res.data));
+      console.log("Login success:", res.data);
+      alert("Đăng nhập thành công!");
+      
+      onClose(); // đóng modal
+      setUser(res.data); // ✅ cập nhật UI ngay
+    } else {
+      // check confirm password
+      if (password !== confirmPassword) {
+        alert("Mật khẩu không khớp!");
+        return;
+      }
+
+      const res = await register({ username, password });
+
+      console.log("Register success:", res.data);
+      alert("Đăng ký thành công! Hãy đăng nhập");
+
+      setActiveTab("login");
+    }
+  } catch (error: any) {
+    console.error(error.response?.data || error.message);
+    alert("Có lỗi xảy ra!");
+  }
+};
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={onClose}>
@@ -99,70 +140,63 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
           </div>
 
           {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Nhập email"
-                className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[#0090DA] text-sm"
-                required
-              />
-            </div>
+         <form onSubmit={handleSubmit} className="space-y-4">
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Mật khẩu
-              </label>
-              <div className="relative">
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Nhập mật khẩu"
-                  className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[#0090DA] text-sm pr-10"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {activeTab === 'login' && (
-                <div className="text-right mt-2">
-                  <a href="#" className="text-xs text-[#0090DA] hover:underline">
-                    Quên mật khẩu?
-                  </a>
-                </div>
-              )}
-            </div>
+  {/* Username */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Tên đăng nhập
+    </label>
+    <input
+      type="text"
+      value={username}
+      onChange={(e) => setUsername(e.target.value)}
+      className="w-full px-4 py-3 border border-gray-300 rounded"
+      required
+    />
+  </div>
 
-            <button
-              type="submit"
-              className="w-full bg-[#0090DA] text-white py-3 rounded font-semibold hover:bg-[#0080c0] transition-colors"
-            >
-              {activeTab === 'login' ? 'Đăng nhập' : 'Đăng ký'}
-            </button>
-          </form>
+  {/* Password */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Mật khẩu
+    </label>
+    <input
+      type="password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="w-full px-4 py-3 border border-gray-300 rounded"
+      required
+    />
+  </div>
 
-          {activeTab === 'register' && (
-            <p className="text-xs text-gray-500 text-center mt-4">
-              Bằng việc đăng ký, bạn đã đồng ý với{' '}
-              <a href="#" className="text-[#0090DA] hover:underline">
-                Điều khoản sử dụng
-              </a>{' '}
-              của chúng tôi
-            </p>
-          )}
+  {/* ✅ Confirm Password */}
+  {activeTab === 'register' && (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Xác nhận mật khẩu
+      </label>
+      <input
+        type="password"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        className="w-full px-4 py-3 border border-gray-300 rounded"
+        required
+      />
+    </div>
+  )}
+
+  {/* ✅ BUTTON LUÔN Ở CUỐI */}
+  <button
+    type="submit"
+    className="w-full bg-[#0090DA] text-white py-3 rounded"
+  >
+    {activeTab === 'login' ? 'Đăng nhập' : 'Đăng ký'}
+  </button>
+
+</form>
         </div>
       </div>
     </div>
-  );
+  );  
 }

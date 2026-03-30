@@ -1,17 +1,21 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Header } from '../components/Header';
 import { LoginModal } from '../components/LoginModal';
-import axios from 'axios'; // Hoặc dùng service của bạn
+import axios from 'axios';
 
 export default function CreateArticle() {
   const navigate = useNavigate();
+
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<any[]>([]);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [user, setUser] = useState<any>(null);
 
-  // Form State
+  // ✅ Form state
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -19,157 +23,214 @@ export default function CreateArticle() {
     categoryId: 0,
   });
 
-  // 1. Lấy danh mục khi load trang (Sử dụng Hardcode để test UI nếu chưa có DB)
+  // ================= LOAD CATEGORIES =================
   useEffect(() => {
-    // Giả lập dữ liệu để test UI ngay
-    const mockCategories = [
-      { id: 1, name: "Chính trị" },
-      { id: 2, name: "Thế giới" },
-      { id: 3, name: "Công nghệ" }
-    ];
-    setCategories(mockCategories);
-    setFormData(prev => ({ ...prev, categoryId: mockCategories[0].id }));
-
-    /* KHI CÓ DATABASE - MỞ ĐOẠN NÀY RA:
     const fetchCats = async () => {
       try {
-        const res = await axios.get("http://localhost:5257/api/Categories");
+        const res = await axios.get("http://localhost:5257/api/categories");
         setCategories(res.data);
-      } catch (err) { console.error(err); }
+
+        // ✅ Auto chọn category đầu tiên
+        if (res.data.length > 0) {
+          setFormData(prev => ({
+            ...prev,
+            categoryId: res.data[0].id
+          }));
+        }
+
+      } catch (err) {
+        console.error("Lỗi load categories:", err);
+      }
     };
+
     fetchCats();
-    */
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  // ================= HANDLE INPUT =================
+  const handleInputChange = (e: any) => {
     const { name, value } = e.target;
+
     setFormData(prev => ({
       ...prev,
       [name]: name === "categoryId" ? Number(value) : value
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // ================= SUBMIT =================
+  const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    // Test UI: Giả lập chờ 1s rồi báo thành công
-    setTimeout(() => {
-      console.log("Dữ liệu gửi đi:", formData);
-      alert("Đăng bài thành công!");
-      setLoading(false);
-      navigate("/"); // Về trang chủ
-    }, 1000);
-
-    /* KHI CHẠY THẬT VỚI BACKEND:
     const token = localStorage.getItem("token");
+
+    // ❌ chưa login
     if (!token) {
-       setIsLoginModalOpen(true);
-       setLoading(false);
-       return;
+      setIsLoginModalOpen(true);
+      setLoading(false);
+      return;
     }
+
+    // ❌ validate
+    if (!formData.title || !formData.content) {
+      setError("Vui lòng nhập đầy đủ thông tin");
+      setLoading(false);
+      return;
+    }
+
+    if (formData.categoryId === 0) {
+      setError("Vui lòng chọn danh mục");
+      setLoading(false);
+      return;
+    }
+
     try {
-       await axios.post("http://localhost:5257/api/Articles", formData, {
-         headers: { Authorization: `Bearer ${token}` }
-       });
-       navigate("/");
+      console.log("DATA GỬI:", formData);
+
+      const res = await axios.post(
+        "http://localhost:5257/api/articles",
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      console.log("RESPONSE:", res.data);
+
+      setSuccess("Đăng bài thành công! 🎉");
+
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
+
     } catch (err: any) {
-       setError("Lỗi đăng bài, vui lòng kiểm tra lại.");
-    } finally { setLoading(false); }
-    */
+      console.log("ERROR:", err.response?.data);
+
+      setError(
+        err.response?.data?.message ||
+        err.response?.data ||
+        "Lỗi đăng bài"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // ================= UI =================
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Tận dụng lại Header từ file Article của bạn */}
       <Header onLoginClick={() => setIsLoginModalOpen(true)} />
 
       <main className="max-w-4xl mx-auto py-10 px-4">
-        <div className="bg-white rounded-xl shadow-sm p-8 border border-gray-100">
-          <h1 className="text-2xl font-bold text-gray-800 mb-6">Viết bài báo mới</h1>
-          
-          {error && <div className="p-3 bg-red-50 text-red-600 rounded-md mb-4">{error}</div>}
+        <div className="bg-white rounded-xl shadow-sm p-8 border">
+
+          <h1 className="text-2xl font-bold mb-6">
+            Viết bài báo mới
+          </h1>
+
+          {error && (
+            <div className="p-3 bg-red-100 text-red-600 mb-4 rounded">
+              {error}
+            </div>
+          )}
+
+          {success && (
+            <div className="p-3 bg-green-100 text-green-600 mb-4 rounded">
+              {success}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Tiêu đề */}
+
+            {/* TITLE */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Tiêu đề bài viết</label>
+              <label>Tiêu đề</label>
               <input
                 name="title"
                 type="text"
                 required
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-                placeholder="Nhập tiêu đề..."
+                className="w-full border p-2 rounded"
                 onChange={handleInputChange}
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Danh mục */}
+            {/* CATEGORY + IMAGE */}
+            <div className="grid grid-cols-2 gap-4">
+
+              {/* CATEGORY */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Danh mục</label>
+                <label>Danh mục</label>
                 <select
                   name="categoryId"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none"
                   value={formData.categoryId}
                   onChange={handleInputChange}
+                  className="w-full border p-2 rounded"
                 >
+                  <option value={0}>-- Chọn danh mục --</option>
+
                   {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
                   ))}
                 </select>
               </div>
 
-              {/* URL Ảnh */}
+              {/* IMAGE */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">URL Hình ảnh</label>
+                <label>Image URL</label>
                 <input
                   name="imageUrl"
                   type="text"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none"
-                  placeholder="https://images.unsplash.com/..."
+                  className="w-full border p-2 rounded"
                   onChange={handleInputChange}
                 />
               </div>
+
             </div>
 
-            {/* Nội dung */}
+            {/* CONTENT */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Nội dung chi tiết</label>
+              <label>Nội dung</label>
               <textarea
                 name="content"
+                rows={10}
                 required
-                rows={12}
-                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"
-                placeholder="Viết nội dung bài báo tại đây..."
+                className="w-full border p-2 rounded"
                 onChange={handleInputChange}
-              ></textarea>
+              />
             </div>
 
-            {/* Nút đăng bài */}
+            {/* BUTTON */}
             <div className="flex justify-end gap-3">
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-6 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition"
+                className="px-4 py-2 border rounded"
               >
                 Hủy
               </button>
+
               <button
                 type="submit"
                 disabled={loading}
-                className={`px-8 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md transition ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'}`}
+                className="px-6 py-2 bg-blue-600 text-white rounded"
               >
-                {loading ? 'Đang đăng bài...' : 'Đăng ngay'}
+                {loading ? "Đang đăng..." : "Đăng bài"}
               </button>
             </div>
+
           </form>
         </div>
       </main>
 
-      {/* Tận dụng lại LoginModal từ file Article của bạn */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        setUser={setUser}
+      />
     </div>
   );
 }

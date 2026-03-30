@@ -1,5 +1,8 @@
 import { Search, LogIn, Calendar, ChevronDown, X } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { LoginModal } from './LoginModal';
+import UserMenu from './MenuAvatar';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   onLoginClick?: () => void;
@@ -8,6 +11,20 @@ interface HeaderProps {
 export function Header({ onLoginClick }: HeaderProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const navigate = useNavigate();
+  useEffect(() => {
+  const storedUser = localStorage.getItem("user");
+  if (storedUser) {
+    setUser(JSON.parse(storedUser));
+  }
+}, []);
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
+  setUser(null);
+};
 
   const categories = {
     'Chính trị': [
@@ -73,13 +90,25 @@ export function Header({ onLoginClick }: HeaderProps) {
             <button className="px-4 py-2 bg-[#0090DA] text-white text-xs font-semibold rounded hover:bg-[#0080c0]">
               Kênh hình 📺
             </button>
-            <button 
-              onClick={onLoginClick}
+            {!user && (
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
               className="px-4 py-2 bg-gray-100 text-gray-700 text-xs font-semibold rounded hover:bg-gray-200 flex items-center gap-1"
             >
               <LogIn className="w-3 h-3" />
               Đăng nhập
-            </button>
+            </button>)}
+
+             {user && (
+              <UserMenu user={user}  onLogout={handleLogout} />
+            )}
+
+            <LoginModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              setUser={setUser}
+            />
           </div>
         </div>
       </div>

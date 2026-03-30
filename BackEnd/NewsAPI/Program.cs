@@ -4,7 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using NewsAPI.AppDataContext;
 using NewsAPI.Services;
-using NewsAPI.Interface;
 using NewsAPI.Middleware;
 using NewsAPI.Models;
 
@@ -17,18 +16,17 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.Configure<DbSettings>(
-    builder.Configuration.GetSection("DbSettings"));
+
 
 // ✅ DbContext
 builder.Services.AddDbContext<NewsDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Default"))
+    options.UseSqlServer(builder.Configuration["DbSettings:ConnectionString"])
 );
 
 // ✅ JWT
 builder.Services.AddScoped<IJwtService, JwtService>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
+
 var jwtKey = builder.Configuration["Jwt:Key"] 
              ?? throw new InvalidOperationException("JWT Key chưa được cấu hình trong appsettings.json!");
 
@@ -58,8 +56,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-// ✅ Custom services
-builder.Services.AddScoped<INewsServices, NewsServices>();
+
 
 // ✅ Exception handler
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

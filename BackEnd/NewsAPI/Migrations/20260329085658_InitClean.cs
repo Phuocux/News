@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace TodoAPI.Migrations
+namespace NewsAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class AddCategoryToArticle : Migration
+    public partial class InitClean : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
