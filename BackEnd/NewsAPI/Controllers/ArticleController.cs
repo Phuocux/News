@@ -39,6 +39,26 @@ namespace NewsAPI.Controllers
             }));
         }
 
+
+        // ================= GET PENDING =================
+        [HttpGet("pending")]
+        public async Task<IActionResult> GetPendingArticles()
+        {
+            var articles = await _context.Articles
+                .Where(a => a.Status == "Pending")
+                .Include(a => a.Author)
+                .Include(a => a.Category)
+                .ToListAsync();
+
+            return Ok(articles.Select(a => new {
+                a.Id,
+                a.Title,
+                a.ImageUrl,
+                author = a.Author.Username,
+                a.CreatedAt,
+                category = a.Category.Name
+            }));
+        }
         // ================= GET BY ID =================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)

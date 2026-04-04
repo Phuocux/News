@@ -64,7 +64,11 @@ export default function UserMenu({ user, onLogout }: any) {
 
           {/* Đăng xuất */}
           <button
-            onClick={onLogout}
+           onClick={() => {
+              onLogout();      // 1. Xóa dữ liệu (localStorage, state...)
+              setOpen(false);  // 2. Đóng menu
+              navigate("/");   // 3. Đẩy người dùng về trang chủ ngay lập tức
+            }}
             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 text-sm text-red-500"
           >
             <span>🚪</span>

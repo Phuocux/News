@@ -15,6 +15,7 @@ export function LoginModal({ isOpen, onClose,setUser }: LoginModalProps) {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+ 
 
   if (!isOpen) return null;
 

@@ -52,7 +52,8 @@ public class UsersController : ControllerBase
             .Select(a => new {
                 a.Id,
                 a.Title,
-                a.CreatedAt
+                a.CreatedAt,
+                a.Status
             })
             .ToListAsync();
 

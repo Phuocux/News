@@ -20,6 +20,14 @@ export function Header({ onLoginClick }: HeaderProps) {
     setUser(JSON.parse(storedUser));
   }
 }, []);
+useEffect(() => {
+  const data = localStorage.getItem("user");
+  if (data) {
+    const parsedUser = JSON.parse(data);
+    console.log("User từ Storage:", parsedUser); // Kiểm tra xem có id ở đây không
+    setUser(parsedUser);
+  }
+}, []);
 const handleLogout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
